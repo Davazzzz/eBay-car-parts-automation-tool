@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, jsonify
 from config import Config
 from junkyard_prices import JunkyardPrices
@@ -702,4 +703,6 @@ if __name__ == '__main__':
     print("\nStarting web server at: http://localhost:5000")
     print("="*60 + "\n")
 
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use dynamic port for deployment (Render, Railway, etc.) or default to 5000 locally
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
