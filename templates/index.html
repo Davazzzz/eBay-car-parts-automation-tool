@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Parts Analyzer">
+    <meta name="theme-color" content="#667eea">
+    <title>eBay Car Parts Profit Analyzer</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .results-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+
+        .results-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .roi-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .roi-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .roi-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .roi-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .summary-card p {
+            opacity: 0.9;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: white;
+            border-bottom-color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .header p {
+                font-size: 0.9em;
+            }
+
+            .card {
+                padding: 15px;
+                border-radius: 8px;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .tab {
+                font-size: 14px;
+                padding: 10px 12px;
+                flex: 1 1 auto;
+                min-width: 100px;
+            }
+
+            .results-table {
+                font-size: 12px;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 8px 4px;
+                white-space: normal;
+            }
+
+            /* Make table scrollable on mobile */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0 -15px;
+                padding: 0 15px;
+            }
+
+            .btn {
+                font-size: 14px;
+                padding: 12px 20px;
+                width: 100%;
+            }
+
+            .btn-secondary {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 eBay Car Parts Profit Analyzer</h1>
+            <p>Find profitable car parts to flip from junkyards</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('link')">Add from eBay Link</button>
+            <button class="tab" onclick="switchTab('saved')">My Parts List</button>
+            <button class="tab" onclick="switchTab('analyze')">Auto Analyzer (Advanced)</button>
+        </div>
+
+        <!-- Add from eBay Link Tab -->
+        <div id="link-tab" class="tab-content active">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Add Part from eBay Link</h2>
+                <p style="margin-bottom: 20px; color: #666;">Paste an eBay listing link below and we'll automatically calculate the ROI and junkyard price!</p>
+
+                <form onsubmit="addFromLink(event)">
+                    <div class="form-group">
+                        <label for="ebay-link">eBay Listing URL</label>
+                        <input type="url" id="ebay-link" placeholder="https://www.ebay.com/itm/..." required>
+                        <small style="color: #666;">Copy and paste the full eBay listing URL (works with sold/completed listings too!)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="custom-part-name">Part Name (Optional)</label>
+                        <input type="text" id="custom-part-name" placeholder="e.g., Front Bumper, Headlight, Radio...">
+                        <small style="color: #666;">Enter a custom part name, or leave blank to auto-generate from eBay listing or junkyard part</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="junkyard-search">Junkyard Part (Search)</label>
+                        <input type="text" id="junkyard-search" placeholder="Type to search junkyard parts..." oninput="searchJunkyardParts(this.value)">
+                        <small style="color: #666;">Start typing to find matching junkyard parts. Select one or multiple parts!</small>
+                        <div id="junkyard-suggestions" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px; display: none;"></div>
+                        <div id="selected-junkyard-parts" style="margin-top: 10px;"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="link-vehicle-type">Vehicle Type</label>
+                        <select id="link-vehicle-type">
+                            <option value="car">Car</option>
+                            <option value="truck">Truck/SUV</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="youtube-link">YouTube Removal Tutorial (Optional)</label>
+                        <input type="url" id="youtube-link" placeholder="https://youtube.com/watch?v=...">
+                        <small style="color: #666;">Paste a YouTube link for removal tutorial (optional)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="part-notes">Notes (Optional)</label>
+                        <textarea id="part-notes" rows="3" placeholder="Add any notes about this part..." style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; font-family: inherit;"></textarea>
+                        <small style="color: #666;">Jot down anything important (condition, location, etc.)</small>
+                    </div>
+
+                    <button type="submit" class="btn">Add to My List</button>
+                </form>
+
+                <div id="link-result" style="margin-top: 20px; display: none;">
+                    <div style="padding: 15px; background: #f0f9ff; border-left: 4px solid #667eea; border-radius: 8px;">
+                        <h3 style="margin-bottom: 10px; color: #667eea;">✅ Added Successfully!</h3>
+                        <div id="link-result-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analyze Tab -->
+        <div id="analyze-tab" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Enter Vehicle Information</h2>
+                <form id="vehicle-form" onsubmit="analyzeVehicle(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="year">Year *</label>
+                            <input type="number" id="year" required min="1900" max="2025" placeholder="2013">
+                        </div>
+                        <div class="form-group">
+                            <label for="make">Make *</label>
+                            <input type="text" id="make" required placeholder="Honda">
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Model *</label>
+                            <input type="text" id="model" required placeholder="Accord">
+                        </div>
+                        <div class="form-group">
+                            <label for="trim">Trim (Optional)</label>
+                            <input type="text" id="trim" placeholder="EX-L 2.4L">
+                        </div>
+                        <div class="form-group">
+                            <label for="vehicle-type">Vehicle Type</label>
+                            <select id="vehicle-type">
+                                <option value="car">Car</option>
+                                <option value="truck">Truck/SUV</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="filter-type">Parts to Analyze</label>
+                            <select id="filter-type">
+                                <option value="high_priority" selected>High Priority (~25 parts, ~1 min) ⭐ RECOMMENDED</option>
+                                <option value="light">Interior + Light Exterior (~120 parts, ~8 min)</option>
+                                <option value="all">All Parts (~441 parts, ~30 min)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Analyze Parts</button>
+                </form>
+            </div>
+
+            <div id="loading" class="card hidden">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing parts... This may take a few minutes.</p>
+                </div>
+            </div>
+
+            <div id="results" class="hidden">
+                <div id="summary-section"></div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Analysis Results</h2>
+                        <div>
+                            <button class="btn btn-secondary" onclick="filterROI(0)">Show All</button>
+                            <button class="btn btn-secondary" onclick="sortByFrequency()">Sort by Frequency</button>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="results-table" id="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Junkyard Part</th>
+                                    <th>eBay Listing Example</th>
+                                    <th>Median Sold</th>
+                                    <th>Avg Sold</th>
+                                    <th>Sold (30d)</th>
+                                    <th>Active</th>
+                                    <th>Junkyard $</th>
+                                    <th>ROI</th>
+                                    <th>Rating</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved List Tab -->
+        <div id="saved-tab" class="tab-content">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">My Parts List</h2>
+                <p style="margin-bottom: 20px; color: #666;">Parts organized by vehicle type</p>
+
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="filterSavedByType('all')">Show All</button>
+                    <button class="btn btn-secondary" onclick="filterSavedByType('car')">Cars Only</button>
+                    <button class="btn btn-secondary" onclick="filterSavedByType('truck')">Trucks/SUVs Only</button>
+                </div>
+
+                <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn" onclick="openMobilePrintView()" style="background: #28a745;">📱 Mobile View / Print to PDF</button>
+                    <button class="btn" onclick="downloadHTMLFile()" style="background: #007bff;">💾 Download HTML File</button>
+                    <button class="btn" onclick="clearAllParts()" style="background: #dc3545;">🗑️ Clear All</button>
+                </div>
+
+                <div id="saved-cars" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 15px;">🚗 Cars</h3>
+                    <div id="saved-cars-content">
+                        <p style="color: #999;">No car parts added yet. Add some from eBay links!</p>
+                    </div>
+                </div>
+
+                <div id="saved-trucks">
+                    <h3 style="margin-bottom: 15px;">🚛 Trucks/SUVs</h3>
+                    <div id="saved-trucks-content">
+                        <p style="color: #999;">No truck/SUV parts added yet. Add some from eBay links!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentResults = [];
+        let allJunkyardParts = [];
+        let selectedJunkyardParts = [];
+
+        // Load all junkyard parts on page load
+        async function loadJunkyardParts() {
+            try {
+                const response = await fetch('/junkyard_parts');
+                const data = await response.json();
+                if (data.success) {
+                    allJunkyardParts = data.parts;
+                }
+            } catch (error) {
+                console.error('Error loading junkyard parts:', error);
+            }
+        }
+
+        // Search junkyard parts as user types
+        function searchJunkyardParts(query) {
+            const suggestions = document.getElementById('junkyard-suggestions');
+
+            if (!query || query.length < 2) {
+                suggestions.style.display = 'none';
+                return;
+            }
+
+            const queryLower = query.toLowerCase();
+            const matches = allJunkyardParts.filter(part =>
+                part.name.toLowerCase().includes(queryLower)
+            ).slice(0, 10);  // Show top 10 matches
+
+            if (matches.length === 0) {
+                suggestions.innerHTML = '<div style="padding: 10px; color: #999;">No matches found</div>';
+                suggestions.style.display = 'block';
+                return;
+            }
+
+            suggestions.innerHTML = matches.map(part => `
+                <div onclick="selectJunkyardPart('${part.name.replace(/'/g, "\\'")}', ${part.price})"
+                     style="padding: 10px; cursor: pointer; border-bottom: 1px solid #eee;"
+                     onmouseover="this.style.background='#f5f5f5'"
+                     onmouseout="this.style.background='white'">
+                    <strong>${part.name}</strong> - $${part.price.toFixed(2)}
+                </div>
+            `).join('');
+            suggestions.style.display = 'block';
+        }
+
+        // Select a junkyard part
+        function selectJunkyardPart(partName, partPrice) {
+            // Check if already selected
+            if (selectedJunkyardParts.some(p => p.name === partName)) {
+                alert('Part already selected!');
+                return;
+            }
+
+            // Add to selected parts
+            selectedJunkyardParts.push({ name: partName, price: partPrice });
+
+            // Update display
+            updateSelectedJunkyardParts();
+
+            // Hide suggestions
+            document.getElementById('junkyard-suggestions').style.display = 'none';
+            document.getElementById('junkyard-search').value = '';
+        }
+
+        // Update the display of selected junkyard parts
+        function updateSelectedJunkyardParts() {
+            const container = document.getElementById('selected-junkyard-parts');
+
+            if (selectedJunkyardParts.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const totalPrice = selectedJunkyardParts.reduce((sum, p) => sum + p.price, 0);
+
+            container.innerHTML = `
+                <div style="border: 1px solid #667eea; border-radius: 8px; padding: 15px; background: #f0f9ff;">
+                    <h4 style="margin-bottom: 10px;">Selected Junkyard Parts:</h4>
+                    ${selectedJunkyardParts.map((part, index) => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                            <span>${part.name} - $${part.price.toFixed(2)}</span>
+                            <button onclick="removeSelectedJunkyardPart(${index})" style="background: #ff4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Remove</button>
+                        </div>
+                    `).join('')}
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #667eea;">
+                        <strong>Total Junkyard Price: $${totalPrice.toFixed(2)}</strong>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Remove a selected junkyard part
+        function removeSelectedJunkyardPart(index) {
+            selectedJunkyardParts.splice(index, 1);
+            updateSelectedJunkyardParts();
+        }
+
+        // Load junkyard parts when page loads
+        window.addEventListener('load', loadJunkyardParts);
+
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+
+            if (tab === 'saved') {
+                loadSavedList();
+            }
+        }
+
+        async function addFromLink(event) {
+            event.preventDefault();
+
+            const ebayUrl = document.getElementById('ebay-link').value;
+            const customPartName = document.getElementById('custom-part-name').value.trim();
+            const vehicleType = document.getElementById('link-vehicle-type').value;
+            const youtubeLink = document.getElementById('youtube-link').value;
+            const notes = document.getElementById('part-notes').value;
+
+            // Get selected junkyard parts (just the names)
+            const junkyardPartNames = selectedJunkyardParts.map(p => p.name);
+
+            // Hide previous result
+            document.getElementById('link-result').style.display = 'none';
+
+            try {
+                const response = await fetch('/add_from_link', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        ebay_url: ebayUrl,
+                        custom_part_name: customPartName,
+                        vehicle_type: vehicleType,
+                        junkyard_parts: junkyardPartNames,
+                        youtube_link: youtubeLink,
+                        notes: notes
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const part = data.part;
+                    const junkyardPartsDisplay = part.junkyard_parts && part.junkyard_parts.length > 0
+                        ? part.junkyard_parts.join(', ')
+                        : 'Auto-matched';
+
+                    document.getElementById('link-result-content').innerHTML = `
+                        <p><strong>Part:</strong> ${part.part_name}</p>
+                        <p><strong>eBay Title:</strong> ${part.ebay_title}</p>
+                        <p><strong>eBay Price:</strong> $${part.ebay_price.toFixed(2)}</p>
+                        <p><strong>Junkyard Part(s):</strong> ${junkyardPartsDisplay}</p>
+                        <p><strong>Junkyard Price:</strong> $${part.junkyard_price.toFixed(2)}</p>
+                        <p><strong>ROI:</strong> ${part.roi.toFixed(2)}x <span class="roi-badge roi-${part.roi_rating.toLowerCase()}">${part.roi_rating}</span></p>
+                        <p><strong>Vehicle Type:</strong> ${part.vehicle_type === 'car' ? '🚗 Car' : '🚛 Truck/SUV'}</p>
+                    `;
+                    document.getElementById('link-result').style.display = 'block';
+
+                    // Clear form and selected parts
+                    document.getElementById('ebay-link').value = '';
+                    document.getElementById('custom-part-name').value = '';
+                    document.getElementById('youtube-link').value = '';
+                    document.getElementById('part-notes').value = '';
+                    selectedJunkyardParts = [];
+                    updateSelectedJunkyardParts();
+
+                    // Scroll to result
+                    document.getElementById('link-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to add part. Make sure the eBay link is valid.'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding part. Please try again.');
+            }
+        }
+
+        async function analyzeVehicle(event) {
+            event.preventDefault();
+
+            const year = document.getElementById('year').value;
+            const make = document.getElementById('make').value;
+            const model = document.getElementById('model').value;
+            const trim = document.getElementById('trim').value;
+            const vehicleType = document.getElementById('vehicle-type').value;
+            const filterType = document.getElementById('filter-type').value;
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ year, make, model, trim, vehicle_type: vehicleType, filter_type: filterType })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentResults = data.results;
+                    displayResults(data.results, data.summary);
+                } else {
+                    console.error('Server error:', data.error);
+                    alert('Error analyzing vehicle: ' + (data.error || 'Unknown error. Please try again.'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error analyzing vehicle. Please try again.');
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        function displayResults(results, summary) {
+            // Show summary
+            const summaryHTML = `
+                <div class="summary">
+                    <div class="summary-card">
+                        <h3>${summary.total_parts}</h3>
+                        <p>Total Parts</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>${summary.high_roi_count}</h3>
+                        <p>High ROI Parts</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>${summary.top_5_parts[0]?.name || 'N/A'}</h3>
+                        <p>Best Part (${summary.top_5_parts[0]?.roi.toFixed(2)}x)</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('summary-section').innerHTML = summaryHTML;
+
+            // Show results table
+            const tbody = document.getElementById('results-body');
+            tbody.innerHTML = '';
+
+            results.forEach((part, index) => {
+                const row = document.createElement('tr');
+                const ebayTitle = part.best_listing_title || 'No listings found';
+                const ebayLink = part.best_listing_url || '#';
+                const ebayTitleDisplay = ebayLink !== '#'
+                    ? `<a href="${ebayLink}" target="_blank" style="color: #667eea; text-decoration: none;">${ebayTitle.substring(0, 60)}${ebayTitle.length > 60 ? '...' : ''}</a>`
+                    : `<span style="color: #999;">${ebayTitle}</span>`;
+
+                row.innerHTML = `
+                    <td><strong>${part.part_name}</strong></td>
+                    <td style="font-size: 0.9em;">${ebayTitleDisplay}</td>
+                    <td>$${part.median_sold_price.toFixed(2)}</td>
+                    <td>$${part.average_sold_price.toFixed(2)}</td>
+                    <td>${part.sold_count}</td>
+                    <td>${part.active_listings}</td>
+                    <td>$${part.junkyard_price.toFixed(2)}</td>
+                    <td>${part.roi.toFixed(2)}x</td>
+                    <td><span class="roi-badge roi-${part.roi_rating.toLowerCase()}">${part.roi_rating}</span></td>
+                    <td>
+                        <button class="btn" style="padding: 6px 12px; font-size: 14px;" onclick="savePart(${index})">Save</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        async function savePart(index) {
+            const part = currentResults[index];
+
+            try {
+                const response = await fetch('/save_part', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(part)
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error saving part.');
+            }
+        }
+
+        async function manualAdd(event) {
+            event.preventDefault();
+
+            const partName = document.getElementById('manual-part').value;
+            const junkyardPrice = parseFloat(document.getElementById('manual-junkyard').value);
+            const ebayPrice = parseFloat(document.getElementById('manual-ebay').value);
+
+            try {
+                const response = await fetch('/manual_add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        part_name: partName,
+                        junkyard_price: junkyardPrice,
+                        ebay_sold_price: ebayPrice
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(`Added: ${data.part.part_name} (ROI: ${data.part.roi.toFixed(2)}x - ${data.part.roi_rating})`);
+                    document.getElementById('manual-form').reset();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error adding part.');
+            }
+        }
+
+        async function loadSavedList() {
+            try {
+                const response = await fetch('/saved_list');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Separate cars and trucks
+                    const cars = data.parts.filter(p => p.vehicle_type === 'car');
+                    const trucks = data.parts.filter(p => p.vehicle_type === 'truck' || p.vehicle_type !== 'car');
+
+                    // Display cars
+                    const carsContent = document.getElementById('saved-cars-content');
+                    if (cars.length === 0) {
+                        carsContent.innerHTML = '<p style="color: #999;">No car parts added yet.</p>';
+                    } else {
+                        carsContent.innerHTML = createPartsTable(cars, 0);
+                    }
+
+                    // Display trucks
+                    const trucksContent = document.getElementById('saved-trucks-content');
+                    if (trucks.length === 0) {
+                        trucksContent.innerHTML = '<p style="color: #999;">No truck/SUV parts added yet.</p>';
+                    } else {
+                        trucksContent.innerHTML = createPartsTable(trucks, cars.length);
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading saved list.');
+            }
+        }
+
+        function createPartsTable(parts, indexOffset) {
+            return `
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Part</th>
+                            <th>eBay Listing</th>
+                            <th>Junkyard $</th>
+                            <th>eBay $</th>
+                            <th>ROI</th>
+                            <th>Rating</th>
+                            <th>YouTube Tutorial</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${parts.map((part, index) => {
+                            const ebayPrice = part.ebay_price || part.ebay_sold_price || part.median_sold_price || 0;
+                            const ebayTitle = part.ebay_title || part.part_name;
+                            const ebayUrl = part.ebay_url || '#';
+                            const ebayLink = ebayUrl !== '#'
+                                ? `<a href="${ebayUrl}" target="_blank" style="color: #667eea;">${ebayTitle.substring(0, 50)}...</a>`
+                                : ebayTitle;
+
+                            // YouTube link
+                            const youtubeLink = part.youtube_link && part.youtube_link.trim() !== ''
+                                ? `<a href="${part.youtube_link}" target="_blank" style="color: #ff0000; text-decoration: none;">🎥 Watch</a>`
+                                : '<span style="color: #999;">-</span>';
+
+                            // Notes (truncated with tooltip)
+                            const notes = part.notes && part.notes.trim() !== ''
+                                ? (part.notes.length > 40
+                                    ? `<span title="${part.notes}">${part.notes.substring(0, 40)}...</span>`
+                                    : part.notes)
+                                : '<span style="color: #999;">-</span>';
+
+                            return `
+                                <tr>
+                                    <td><strong>${part.part_name}</strong></td>
+                                    <td style="font-size: 0.9em;">${ebayLink}</td>
+                                    <td>$${part.junkyard_price.toFixed(2)}</td>
+                                    <td>$${ebayPrice.toFixed(2)}</td>
+                                    <td>${part.roi.toFixed(2)}x</td>
+                                    <td><span class="roi-badge roi-${part.roi_rating.toLowerCase()}">${part.roi_rating}</span></td>
+                                    <td style="font-size: 0.9em;">${youtubeLink}</td>
+                                    <td style="font-size: 0.85em; max-width: 200px;">${notes}</td>
+                                    <td>
+                                        <button class="btn" style="padding: 6px 12px; font-size: 14px; background: #667eea; margin-right: 5px;" onclick="editPart(${indexOffset + index})">Edit</button>
+                                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 14px;" onclick="removePart(${indexOffset + index})">Remove</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function filterSavedByType(type) {
+            if (type === 'all') {
+                document.getElementById('saved-cars').style.display = 'block';
+                document.getElementById('saved-trucks').style.display = 'block';
+            } else if (type === 'car') {
+                document.getElementById('saved-cars').style.display = 'block';
+                document.getElementById('saved-trucks').style.display = 'none';
+            } else if (type === 'truck') {
+                document.getElementById('saved-cars').style.display = 'none';
+                document.getElementById('saved-trucks').style.display = 'block';
+            }
+        }
+
+        function filterSavedByROI(minROI) {
+            // Reload list and filter by ROI
+            loadSavedList();
+            // TODO: Implement ROI filtering on saved list
+        }
+
+        async function clearAllParts() {
+            if (!confirm('Are you sure you want to clear ALL saved parts? This cannot be undone!')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/clear_all', { method: 'POST' });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('All parts cleared!');
+                    loadSavedList();
+                } else {
+                    alert('Error clearing parts: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error clearing parts.');
+            }
+        }
+
+        function openMobilePrintView() {
+            // Open mobile-friendly HTML view in new tab for printing to PDF
+            window.open('/export_html', '_blank');
+        }
+
+        function downloadHTMLFile() {
+            // Auto-download HTML file for offline mobile use
+            window.location.href = '/download_html';
+        }
+
+        async function removePart(index) {
+            if (!confirm('Remove this part from saved list?')) return;
+
+            try {
+                const response = await fetch(`/remove_part/${index}`, { method: 'DELETE' });
+                const data = await response.json();
+
+                if (data.success) {
+                    loadSavedList();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error removing part.');
+            }
+        }
+
+        async function editPart(index) {
+            try {
+                // Fetch current parts list
+                const response = await fetch('/saved_list');
+                const data = await response.json();
+
+                if (data.success && data.parts[index]) {
+                    const part = data.parts[index];
+
+                    // Prompt for YouTube link
+                    const youtubeLink = prompt('YouTube Tutorial Link (leave empty to remove):', part.youtube_link || '');
+                    if (youtubeLink === null) return; // User cancelled
+
+                    // Prompt for notes
+                    const notes = prompt('Notes (leave empty to remove):', part.notes || '');
+                    if (notes === null) return; // User cancelled
+
+                    // Update the part
+                    const updateResponse = await fetch(`/update_part/${index}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            youtube_link: youtubeLink,
+                            notes: notes
+                        })
+                    });
+
+                    const updateData = await updateResponse.json();
+                    if (updateData.success) {
+                        alert('Part updated successfully!');
+                        loadSavedList();
+                    } else {
+                        alert('Error updating part: ' + updateData.error);
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error editing part.');
+            }
+        }
+
+        function filterROI(minROI) {
+            const filtered = currentResults.filter(r => r.roi >= minROI);
+            const summary = {
+                total_parts: filtered.length,
+                high_roi_count: filtered.filter(r => r.roi_rating === 'High').length,
+                top_5_parts: filtered.slice(0, 5).map(p => ({ name: p.part_name, roi: p.roi }))
+            };
+            displayResults(filtered, summary);
+        }
+
+        function sortByFrequency() {
+            const sorted = [...currentResults].sort((a, b) => b.sold_count - a.sold_count);
+            const summary = {
+                total_parts: sorted.length,
+                high_roi_count: sorted.filter(r => r.roi_rating === 'High').length,
+                top_5_parts: sorted.slice(0, 5).map(p => ({ name: p.part_name, roi: p.roi }))
+            };
+            displayResults(sorted, summary);
+        }
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => {
+                        console.log('SW registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
