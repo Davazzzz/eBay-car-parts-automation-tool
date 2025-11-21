@@ -206,6 +206,51 @@
             display: none;
         }
 
+        .nav-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(102, 126, 234, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .nav-title {
+            color: white;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
         .tabs {
             display: flex;
             gap: 10px;
@@ -242,6 +287,21 @@
         @media (max-width: 768px) {
             body {
                 padding: 10px;
+            }
+
+            .nav-bar {
+                padding: 10px 15px;
+                margin: -10px -10px 15px -10px;
+                border-radius: 0;
+            }
+
+            .nav-btn {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+
+            .nav-title {
+                font-size: 0.95em;
             }
 
             .header h1 {
@@ -301,6 +361,15 @@
 </head>
 <body>
     <div class="container">
+        <!-- Sticky Navigation Bar -->
+        <div class="nav-bar">
+            <div class="nav-title">Parts Analyzer</div>
+            <button class="nav-btn" onclick="goToDashboard()">
+                <span>🏠</span>
+                <span>Dashboard</span>
+            </button>
+        </div>
+
         <div class="header">
             <h1>🚗 eBay Car Parts Profit Analyzer</h1>
             <p>Find profitable car parts to flip from junkyards</p>
@@ -594,6 +663,18 @@
         // Load junkyard parts when page loads
         window.addEventListener('load', loadJunkyardParts);
 
+        function goToDashboard() {
+            // Switch to the first tab (Add from eBay Link)
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab')[0].classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('link-tab').classList.add('active');
+
+            // Scroll to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function switchTab(tab) {
             // Update tab buttons
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -606,6 +687,9 @@
             if (tab === 'saved') {
                 loadSavedList();
             }
+
+            // Scroll to top when switching tabs
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         async function addFromLink(event) {
